@@ -11,8 +11,9 @@ bot = Discordrb::Bot.new token: tk, client_id: 348122769072062474
 
 puts "Bot invite link: #{bot.invite_url}"
 
-@prefix = ['rb!', 'r!']
+@prefix = ['rb!', 'r!', 'hey ruboat, can you do ']
 @suffix = [', do it', ' pls']
+@regex = [/$ do it/] # experimental(tm) regex(tm) feature(tm)
 
 owner = 190544080164487168
 
@@ -37,7 +38,8 @@ add_cmd(:eval) do |e, args|
 end
 
 add_cmd(:ping) do |e, args|
-    e.respond "hi"
+    msgs = ['Is this the part where I say pong?', 'gnoP!', 'Pong, I guess.', 'Pong...?', 'Do you want a pong? This isn\'t how to get a pong.']
+    e.respond msgs.sample
 end
 
 add_cmd(:exit) do |e, args|
@@ -47,40 +49,21 @@ add_cmd(:exit) do |e, args|
     exit!
 end
 
-def checktable(tbl, str) # util function
-    tbl.each do |prfx|
-        if str.start_with? prfx
+def checktblmatch(tbl, str)
+    tbl.each do |regex|
+        if str.match(regex)
             return true
         end
     end
     return false
 end
 
-def simtable(tbl, str) # util func #2
-    tbl.each do |string|
-        if str.start_with? string
-            return string
+def tblgsub(tbl, str)
+    tbl.each do |regex|
+        if str.match(regex)
+            return str.gsub(regex)
         end
     end
-    return false
-end
-
-def checktableend(tbl, str) # util func #3
-    tbl.each do |prfx|
-        if str.end_with? prfx
-            return true
-        end
-    end
-    return false
-end
-
-def simtableend(tbl, str) # util func #4
-    tbl.each do |string|
-        if str.end_with? string
-            return string
-        end
-    end
-    return false
 end
 
 class String
@@ -100,27 +83,34 @@ def do_cmd(cmd, event, args)
     end
 end
 
+def check_prefix(content, prefixes)
+    prefixes.each { |prefix|
+        m = content.match(/^#{Regexp.escape(prefix)}\s*(\S*)\s*(.*)/m)
+        next unless m
+        raw, command, args = m[0], m[1], m[2]
+        return raw, command, args
+    }
+end
+
+def check_suffix(content, prefixes)
+    prefixes.each { |prefix|
+        m = content.match(/(\S*)\s*(.*)#{Regexp.escape(prefix)}$/m)
+        next unless m
+        raw, command, args = m[0], m[1], m[2]
+        return raw, command, args
+    }
+end
+
 ## begin hecking command framework ##
 
 bot.message do |event|
-    if checktable(@prefix, event.content)
-        # it's a command
-        cmd = event.content[simtable(@prefix, event.content).length, event.content.length] # this will screw up 
-        cmd = cmd.strip
-        cmd = cmd.split(' ')[0]
-        args = event.content.split(' ')
-        args = args[1,args.length]
-        do_cmd(cmd, event, args)
+    raw, cmd, args = check_prefix(event.content, @prefix)
+    if cmd 
+        do_cmd(cmd, event, args) 
     end
-    # i'm better off doing suffixes in another if block #
-    if checktableend(@suffix, event.content)
-        # yeah it's a command
-        cmd = event.content.revsub(simtableend(@suffix, event.content))
-        args = cmd.split(' ')
-        args = args[1, args.length]
-        cmd = cmd.strip
-        cmd = cmd.split(' ')[0]
-        do_cmd(cmd, event, args)
+    raw, cmd, args = check_suffix(event.content, @suffix)
+    if cmd
+        do_cmd cmd, event, args
     end
 end
 
