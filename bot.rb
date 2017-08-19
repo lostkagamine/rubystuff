@@ -1,6 +1,8 @@
 # rubyboat comand handler v0.01
 # (c) ry00001 2017
 
+# <ryware>
+
 require 'discordrb'
 
 tk = open('token').read
@@ -10,7 +12,7 @@ bot = Discordrb::Bot.new token: tk, client_id: 348122769072062474
 puts "Bot invite link: #{bot.invite_url}"
 
 @prefix = ['rb!', 'r!']
-@suffix = [', do it']
+@suffix = [', do it', ' pls']
 
 owner = 190544080164487168
 
@@ -112,6 +114,7 @@ bot.message do |event|
     end
     # i'm better off doing suffixes in another if block #
     if checktableend(@suffix, event.content)
+        # yeah it's a command
         cmd = event.content.revsub(simtableend(@suffix, event.content))
         args = cmd.split(' ')
         args = args[1, args.length]
@@ -124,3 +127,5 @@ end
 ## end hecking command framework ##
 
 bot.run
+
+# </ryware>
