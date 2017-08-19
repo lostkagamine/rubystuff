@@ -11,7 +11,7 @@ bot = Discordrb::Bot.new token: tk, client_id: 348122769072062474
 
 puts "Bot invite link: #{bot.invite_url}"
 
-@prefix = ['rb!', 'r!', 'hey ruboat, can you do ']
+@prefix = ['rb!', 'r!', 'hey ruboat, can you do ', 'pls ']
 @suffix = [', do it', ' pls']
 @regex = [/$ do it/] # experimental(tm) regex(tm) feature(tm)
 
@@ -41,13 +41,27 @@ add_cmd(:eval, 'Please don\'t try to use this.') do |e, args|
 end
 
 add_cmd(:ping, 'Pong?') do |e, args|
-    msgs = ['Is this the part where I say pong?', 'gnoP!', 'Pong, I guess.', 'Pong...?', 'Do you want a pong? This isn\'t how to get a pong.']
+    msgs = [
+        'Is this the part where I say pong?',
+        'gnoP!',
+        'Pong, I guess.',
+        'Pong...?',
+        'Do you want a pong? This isn\'t how to get a pong.'
+    ]
     e.respond msgs.sample
 end
 
 add_cmd(:exit, 'Nooooo!') do |e, args|
     next unless e.author.id == owner
-    msgs = ['You\'re mean.', 'rip me I guess', 'Please don\'t shut me down...', 'Please no...', 'Shutting down...']
+    msgs = [
+        'You\'re mean.',
+        'rip me I guess',
+        'Please don\'t shut me down...',
+        'Please no...',
+        'Shutting down...',
+        'Thanks anyway...',
+        'I don\'t hate you.'
+    ]
     e.respond msgs.sample
     exit!
 end
@@ -67,7 +81,7 @@ end
 
 add_cmd(:error, 'ok') do |e, args|
     break unless e.author.id == owner
-    e.respond "This is intended. Please don't."
+    e.respond "This is intended. Please don't tell Ry about it."
     e.respond 3/0
 end
 
