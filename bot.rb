@@ -1,39 +1,77 @@
 require 'discordrb'
 
-tk = open("token").read
+tk = open('token').read
 
 bot = Discordrb::Bot.new token: tk, client_id: 348122769072062474
 
 puts "Bot invite link: #{bot.invite_url}"
 
-prefix = 'rb!'
+@prefix = ['rb!', 'r!']
+
+owner = 190544080164487168
+
+@cmds = {}
+
+def add_cmd(name, &block)
+    @cmds[name] = block
+end
+
+add_cmd(:hi) do |e, args|
+    e.respond "hi"
+end
+
+add_cmd(:eval) do |e, args|
+    break unless e.author.id == owner
+    begin
+        o = eval args.join(' ')
+        e.respond "Evaled successfully.\n\n```#{o}```"
+    rescue => err
+        e.respond "Error.\n\n```#{err}```"
+    end
+end
+
+add_cmd(:ping) do |e, args|
+    e.respond "hi"
+end
+
+def checktable(tbl, str) # util function
+    tbl.each do |prfx|
+        if str.start_with? prfx
+            return true
+        end
+    end
+    return false
+end
+
+def simtable(tbl, str) # util func #2
+    tbl.each do |string|
+        if str.start_with? string
+            return string
+        end
+    end
+    return false
+end
+
+## begin hecking command framework ##
 
 bot.message do |event|
-    if event.content.start_with? prefix
+    if checktable(@prefix, event.content)
         # it's a command
-        cmd = event.content[prefix.length, event.content.length]
-        cnts = event.content.split(' ')
-        puts cmd
-        puts cnts
-        if cmd == 'hello'
-            event.respond 'Hello Ruby!'
-        end
-        if cmd == 'eval'
-            code = cnts[1, cnts.length]
-            break unless event.user.id == 190544080164487168
-            begin
-                e = eval code.join(' ')
-                event.respond "Success!\n\n```\n#{e}```"
-            rescue Exception => m
-                event.respond "Oops. You did a bad.\n\n```\n#{m}```"
-            end
-        end
-        if cmd == 'quit'
-            break unless event.user.id == 190544080164487168
-            event.respond 'You\'re mean. :('
-            quit
+        cmd = event.content[simtable(@prefix, event.content).length, event.content.length] # this will screw up 
+        cmd = cmd.strip
+        cmd = cmd.split(' ')[0]
+        args = event.content.split(' ')
+        args = args[1,args.length]
+        p args
+        p cmd
+        begin
+            @cmds[cmd.to_sym].call(event, args)
+        rescue => a
+            event.respond "ry is bad\n\n#{a}"
         end
     end
 end
+
+## end hecking command framework ##
 
 bot.run
