@@ -40,7 +40,8 @@ end
 
 add_cmd(:exit) do |e, args|
     next unless e.author.id == owner
-    e.respond 'You\'re mean. :('
+    msgs = ['You\'re mean.', 'rip me I guess', 'Please don\'t shut me down...', 'Please no...', 'Shutting down...']
+    e.respond msgs.sample
     exit!
 end
 
