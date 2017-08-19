@@ -19,15 +19,18 @@ owner = 190544080164487168
 
 @cmds = {}
 
-def add_cmd(name, &block)
+@descs = {}
+
+def add_cmd(name, desc, &block)
     @cmds[name] = block
+    @descs[name] = desc
 end
 
-add_cmd(:hi) do |e, args|
+add_cmd(:hi, "Hello.") do |e, args|
     e.respond "hi"
 end
 
-add_cmd(:eval) do |e, args|
+add_cmd(:eval, 'Please don\'t try to use this.') do |e, args|
     next unless e.author.id == owner
     begin
         o = eval args.join(' ')
@@ -37,31 +40,34 @@ add_cmd(:eval) do |e, args|
     end
 end
 
-add_cmd(:ping) do |e, args|
+add_cmd(:ping, 'Pong?') do |e, args|
     msgs = ['Is this the part where I say pong?', 'gnoP!', 'Pong, I guess.', 'Pong...?', 'Do you want a pong? This isn\'t how to get a pong.']
     e.respond msgs.sample
 end
 
-add_cmd(:exit) do |e, args|
+add_cmd(:exit, 'Nooooo!') do |e, args|
     next unless e.author.id == owner
     msgs = ['You\'re mean.', 'rip me I guess', 'Please don\'t shut me down...', 'Please no...', 'Shutting down...']
     e.respond msgs.sample
     exit!
 end
 
-add_cmd(:help) do |e, args|
+add_cmd(:help, '...') do |e, args|
     lul = @cmds.keys
+    mmLol = @descs.values
     e.channel.send_embed("") do |embed|
         embed.colour = 0x00FF00
         embed.title = "RubyBoat Commands"
         lul.each_with_index do |key, index|
-            lul[index] = "**#{key}**"
+            lul[index] = "**#{key}** - #{mmLol[index]}"
         end
         embed.description = lul.join("\n")
     end
 end
 
-add_cmd(:error) do |e, args|
+add_cmd(:error, 'ok') do |e, args|
+    break unless e.author.id == owner
+    e.respond "This is intended. Please don't."
     e.respond 3/0
 end
 
