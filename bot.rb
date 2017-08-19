@@ -52,7 +52,7 @@ end
 add_cmd(:help) do |e, args|
     lul = @cmds.keys
     e.channel.send_embed("") do |embed|
-        embed.colour = 0x0FF000
+        embed.colour = 0x00FF00
         embed.title = "RubyBoat Commands"
         lul.each_with_index do |key, index|
             lul[index] = "**#{key}**"
