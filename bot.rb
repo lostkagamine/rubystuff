@@ -1,3 +1,6 @@
+# rubyboat comand handler v0.01
+# (c) ry00001 2017
+
 require 'discordrb'
 
 tk = open('token').read
@@ -7,6 +10,7 @@ bot = Discordrb::Bot.new token: tk, client_id: 348122769072062474
 puts "Bot invite link: #{bot.invite_url}"
 
 @prefix = ['rb!', 'r!']
+@suffix = [', do it']
 
 owner = 190544080164487168
 
@@ -21,7 +25,7 @@ add_cmd(:hi) do |e, args|
 end
 
 add_cmd(:eval) do |e, args|
-    break unless e.author.id == owner
+    next unless e.author.id == owner
     begin
         o = eval args.join(' ')
         e.respond "Evaled successfully.\n\n```#{o}```"
@@ -32,6 +36,12 @@ end
 
 add_cmd(:ping) do |e, args|
     e.respond "hi"
+end
+
+add_cmd(:exit) do |e, args|
+    next unless e.author.id == owner
+    e.respond 'You\'re mean. :('
+    exit!
 end
 
 def checktable(tbl, str) # util function
@@ -52,6 +62,41 @@ def simtable(tbl, str) # util func #2
     return false
 end
 
+def checktableend(tbl, str) # util func #3
+    tbl.each do |prfx|
+        if str.end_with? prfx
+            return true
+        end
+    end
+    return false
+end
+
+def simtableend(tbl, str) # util func #4
+    tbl.each do |string|
+        if str.end_with? string
+            return string
+        end
+    end
+    return false
+end
+
+class String
+    def revsub(input, second = '')
+        e = self.reverse.sub input.reverse, second # MOAR UTIL FUNCTIONS
+        return e.reverse
+    end
+end
+
+def do_cmd(cmd, event, args)
+    begin
+        a = @cmds[cmd.to_sym]
+        return unless a
+        a.call(event, args)
+    rescue => a
+        event.respond "ry is bad\n\n#{a}"
+    end
+end
+
 ## begin hecking command framework ##
 
 bot.message do |event|
@@ -62,13 +107,16 @@ bot.message do |event|
         cmd = cmd.split(' ')[0]
         args = event.content.split(' ')
         args = args[1,args.length]
-        p args
-        p cmd
-        begin
-            @cmds[cmd.to_sym].call(event, args)
-        rescue => a
-            event.respond "ry is bad\n\n#{a}"
-        end
+        do_cmd(cmd, event, args)
+    end
+    # i'm better off doing suffixes in another if block #
+    if checktableend(@suffix, event.content)
+        cmd = event.content.revsub(simtableend(@suffix, event.content))
+        args = cmd.split(' ')
+        args = args[1, args.length]
+        cmd = cmd.strip
+        cmd = cmd.split(' ')[0]
+        do_cmd(cmd, event, args)
     end
 end
 
