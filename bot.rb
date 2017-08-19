@@ -49,6 +49,22 @@ add_cmd(:exit) do |e, args|
     exit!
 end
 
+add_cmd(:help) do |e, args|
+    lul = @cmds.keys
+    e.channel.send_embed("") do |embed|
+        embed.colour = 0x0FF000
+        embed.title = "RubyBoat Commands"
+        lul.each_with_index do |key, index|
+            lul[index] = "**#{key}**"
+        end
+        embed.description = lul.join("\n")
+    end
+end
+
+add_cmd(:error) do |e, args|
+    e.respond 3/0
+end
+
 def checktblmatch(tbl, str)
     tbl.each do |regex|
         if str.match(regex)
@@ -79,7 +95,12 @@ def do_cmd(cmd, event, args)
         return unless a
         a.call(event, args)
     rescue => a
-        event.respond "ry is bad\n\n#{a}"
+        event.channel.send_embed("") do |embed|
+            embed.title = "An error occurred."
+            embed.description = "In essence, Ry is bad. Just... go ahead and tell him or something."
+            embed.colour = 0xFF0000
+            embed.add_field(name: "Error info", value: "```\n#{a}```")
+        end
     end
 end
 
@@ -88,6 +109,7 @@ def check_prefix(content, prefixes)
         m = content.match(/^#{Regexp.escape(prefix)}\s*(\S*)\s*(.*)/m)
         next unless m
         raw, command, args = m[0], m[1], m[2]
+        args = args.split(' ')
         return raw, command, args
     }
 end
@@ -97,6 +119,7 @@ def check_suffix(content, prefixes)
         m = content.match(/(\S*)\s*(.*)#{Regexp.escape(prefix)}$/m)
         next unless m
         raw, command, args = m[0], m[1], m[2]
+        args = args.split(' ')
         return raw, command, args
     }
 end
@@ -104,11 +127,11 @@ end
 ## begin hecking command framework ##
 
 bot.message do |event|
-    raw, cmd, args = check_prefix(event.content, @prefix)
+    raw, cmd, args = check_prefix event.content, @prefix
     if cmd 
-        do_cmd(cmd, event, args) 
+        do_cmd cmd, event, args
     end
-    raw, cmd, args = check_suffix(event.content, @suffix)
+    raw, cmd, args = check_suffix event.content, @suffix
     if cmd
         do_cmd cmd, event, args
     end
