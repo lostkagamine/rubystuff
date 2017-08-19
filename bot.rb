@@ -79,6 +79,17 @@ add_cmd(:help, '...') do |e, args|
     end
 end
 
+add_cmd(:invoke, 'Manage Ruboat\'s invokers.') do |e, args|
+    if args[0] == 'list'
+        e.respond "**RubyBoat Invokers**\n\n```\nPrefixes: #{@prefix.join(' | ')}\nSuffixes: #{@suffix.join(' | ')}```"
+    elsif args[0] == 'add_prefix'
+        prefix = args[1, args.length]
+        prefix = prefix.join(' ')
+        prefix = prefix.tr('"', '')
+        @prefix << prefix
+    end
+end
+
 add_cmd(:error, 'ok') do |e, args|
     break unless e.author.id == owner
     e.respond "This is intended. Please don't tell Ry about it."
