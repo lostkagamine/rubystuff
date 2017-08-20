@@ -50,7 +50,8 @@ add_cmd(:ping, 'Pong?') do |e, args|
         'Pong...?',
         'Do you want a pong? This isn\'t how to get a pong.'
     ]
-    e.respond msgs.sample
+    mmLol = e.respond msgs.sample
+    mmLol.edit mmLol.content + " | #{Integer((mmLol.timestamp - e.timestamp)*1000)}ms"
 end
 
 add_cmd(:exit, 'Nooooo!') do |e, args|
