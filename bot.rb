@@ -40,15 +40,14 @@ def do_help_sub(cmd, event)
         event.respond 'Oops, that\'s not even meant to happen. Please tell Ry about this.'
         return
     end
-    event.channel.send_embed("") do |embed|
+    event.channel.send_embed do |embed|
         begin
             embed.color = 0x00FF00
             embed.title = "Command info for #{cmd}"
             embed.add_field(name: 'Description', value: @descs[cmd])
-            if @subcmds[cmd]
-                a = @subcmds[cmd].keys().join(', ')
-                embed.add_field(name: 'Subcommands', value: "```\n#{a}```")
-            end
+            return unless @subcmds[cmd]
+            a = @subcmds[cmd].keys().join(', ')
+            embed.add_field(name: 'Subcommands', value: "```\n#{a}```")
         rescue => a
             embed.color = 0xFF0000
             embed.title = 'Oops.'
@@ -105,7 +104,7 @@ add_cmd(:help, '...') do |e, args|
     if !args[0]
         lul = @cmds.keys
         mmLol = @descs.values
-        e.channel.send_embed("") do |embed|
+        e.channel.send_embed do |embed|
             embed.colour = 0x00FF00
             embed.title = "RubyBoat Commands"
             lul.each_with_index do |key, ind|
@@ -194,7 +193,7 @@ def do_cmd(cmd, event, args)
         return unless a
         a.call(event, args)
     rescue => a
-        event.channel.send_embed("") do |embed|
+        event.channel.send_embed do |embed|
             embed.title = "An error occurred."
             embed.description = "In essence, Ry is bad. Just... go ahead and tell him or something."
             embed.colour = 0xFF0000
@@ -211,7 +210,7 @@ def do_subcmd(cmd, subcmd, event, args)
         end
         a.call(event, args)
     rescue => a
-        event.channel.send_embed("") do |embed|
+        event.channel.send_embed do |embed|
             embed.title = "An error occurred."
             embed.description = "In essence, Ry is bad. Just... go ahead and tell him or something."
             embed.colour = 0xFF0000
