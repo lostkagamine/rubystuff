@@ -5,17 +5,18 @@
 
 require 'discordrb'
 
-tk = open('token').read
+config = YAML.load 'config.yml' # ok]
+tk = config['login']['token']
+id = config['login']['id']
+owner = config['settings']['owner']
 
-bot = Discordrb::Bot.new token: tk, client_id: 348122769072062474
+bot = Discordrb::Bot.new token: tk, client_id: id
 
 puts "Bot invite link: #{bot.invite_url}"
 
 @prefix = ['rb!', 'r!', 'hey ruboat, can you do ', 'pls ']
 @suffix = [', do it', ' pls']
 @regex = [/$ do it/] # experimental(tm) regex(tm) feature(tm)
-
-owner = 190544080164487168
 
 @cmds = {}
 
@@ -54,7 +55,7 @@ end
 add_cmd(:exit, 'Nooooo!') do |e, args|
     next unless e.author.id == owner
     msgs = [
-        'You\'re mean.',
+        'You\'re mean. :(',
         'rip me I guess',
         'Please don\'t shut me down...',
         'Please no...',
@@ -84,9 +85,48 @@ add_cmd(:invoke, 'Manage Ruboat\'s invokers.') do |e, args|
         e.respond "**RubyBoat Invokers**\n\n```\nPrefixes: #{@prefix.join(' | ')}\nSuffixes: #{@suffix.join(' | ')}```"
     elsif args[0] == 'add_prefix'
         prefix = args[1, args.length]
-        prefix = prefix.join(' ')
-        prefix = prefix.tr('"', '')
-        @prefix << prefix
+        prefix = prefix.join ' '
+        prefix = prefix.tr '"', ''
+        prefix = prefix.tr "'", ''
+        if !@prefix.include? prefix
+            @prefix << prefix
+            e.respond ':ok_hand:'
+        else
+            e.respond 'Um, nope. No duplicates allowed.'
+        end
+    elsif args[0] == 'add_suffix'
+        suffix = args[1, args.length]
+        suffix = suffix.join ' '
+        suffix = suffix.tr '"', ''
+        suffix = suffix.tr "'", ''
+        if !@suffix.include? suffix
+            @suffix << suffix
+            e.respond ':ok_hand:'
+        else
+            e.respond 'Um, nope. I\'m afraid I can\'t let you do that. This suffix is already present.'
+        end
+    elsif args[1] == 'del_prefix'
+        prefix = args[1, args.length]
+        prefix = prefix.join ' '
+        prefix = prefix.tr '"', ''
+        prefix = prefix.tr "'", ''
+        if @prefix.include? prefix
+            @prefix.delete prefix
+            e.respond ':ok_hand:'
+        else
+            e.respond 'This isn\'t even a prefix, you meme.'
+        end
+    elsif args[1] == 'del_suffix'
+        suffix = args[1, args.length]
+        suffix = suffix.join ' '
+        suffix = suffix.tr '"', ''
+        suffix = suffix.tr "'", ''
+        if @suffix.include? prefix
+            @suffix.delete(prefix)
+            e.respond ':ok_hand:'
+        else
+            e.respond 'Nope, not a suffix. Please use a valid suffix instead.'
+        end
     end
 end
 
