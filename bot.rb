@@ -10,6 +10,7 @@ config = YAML.load_file 'config.yml' # ok]
 tk = config['login']['token']
 id = config['login']['id']
 owner = config['settings']['owner']
+version = config['settings']['version']
 
 bot = Discordrb::Bot.new token: tk, client_id: id
 
@@ -20,13 +21,22 @@ puts "Bot invite link: #{bot.invite_url}"
 @regex = [/$ do it/] # experimental(tm) regex(tm) feature(tm)
 
 @cmds = {}
-
 @descs = {}
+@subcmds = {}
 
 def add_cmd(name, desc, &block)
     @cmds[name] = block
     @descs[name] = desc
 end
+
+def add_subcmd(cmd, sname, &block)
+    if !@subcmds.key? cmd
+        @subcmds[cmd] = {}
+    end
+    @subcmds[cmd][sname] = block
+end
+
+
 
 add_cmd(:hi, "Hello.") do |e, args|
     e.respond "hi"
@@ -83,57 +93,43 @@ add_cmd(:help, '...') do |e, args|
 end
 
 add_cmd(:invoke, 'Manage Ruboat\'s invokers.') do |e, args|
-    if args[0] == 'list'
-        e.respond "**RubyBoat Invokers**\n\n```\nPrefixes: #{@prefix.join(' | ')}\nSuffixes: #{@suffix.join(' | ')}```"
-    elsif args[0] == 'add_prefix'
-        prefix = args[1, args.length]
-        prefix = prefix.join ' '
-        prefix = prefix.tr '"', ''
-        prefix = prefix.tr "'", ''
-        if !@prefix.include? prefix
-            @prefix << prefix
-            e.respond ':ok_hand:'
-        else
-            e.respond 'Um, nope. No duplicates allowed.'
-        end
-    elsif args[0] == 'add_suffix'
-        suffix = args[1, args.length]
-        suffix = suffix.join ' '
-        suffix = suffix.tr '"', ''
-        suffix = suffix.tr "'", ''
-        if !@suffix.include? suffix
-            @suffix << suffix
-            e.respond ':ok_hand:'
-        else
-            e.respond 'Um, nope. I\'m afraid I can\'t let you do that. This suffix is already present.'
-        end
-    elsif args[1] == 'del_prefix'
-        prefix = args[1, args.length]
-        prefix = prefix.join ' '
-        prefix = prefix.tr '"', ''
-        prefix = prefix.tr "'", ''
-        if @prefix.include? prefix
-            @prefix.delete prefix
-            e.respond ':ok_hand:'
-        else
-            e.respond 'This isn\'t even a prefix, you meme.'
-        end
-    elsif args[1] == 'del_suffix'
-        suffix = args[1, args.length]
-        suffix = suffix.join ' '
-        suffix = suffix.tr '"', ''
-        suffix = suffix.tr "'", ''
-        if @suffix.include? prefix
-            @suffix.delete(prefix)
-            e.respond ':ok_hand:'
-        else
-            e.respond 'Nope, not a suffix. Please use a valid suffix instead.'
-        end
+    if args[0] != nil
+        do_subcmd(:invoke, args[0].to_sym, e, args)
+    end
+end
+
+add_subcmd(:invoke, :list) do |e, args|
+    e.respond "**RubyBoat Invokers**\n\n```\nPrefixes: #{@prefix.join(' | ')}\nSuffixes: #{@suffix.join(' | ')}```"
+end
+
+add_subcmd(:invoke, :add_prefix) do |e, args|
+    prefix = args[1, args.length]
+    prefix = prefix.join ' '
+    prefix = prefix.tr '"', ''
+    prefix = prefix.tr "'", ''
+    if !@prefix.include? prefix
+        @prefix << prefix
+        e.respond ':ok_hand:'
+    else
+        e.respond 'Um, nope. No duplicates allowed.'
+    end
+end
+
+add_subcmd(:invoke, :add_suffix) do |e, args|
+    suffix = args[1, args.length]
+    suffix = suffix.join ' '
+    suffix = suffix.tr '"', ''
+    suffix = suffix.tr "'", ''
+    if !@suffix.include? suffix
+        @suffix << suffix
+        e.respond ':ok_hand:'
+    else
+        e.respond 'Um, nope. I\'m afraid I can\'t let you do that. This suffix is already present.'
     end
 end
 
 add_cmd(:error, 'ok') do |e, args|
-    break unless e.author.id == owner
+    next unless e.author.id == owner
     e.respond "This is intended. Please don't tell Ry about it."
     e.respond 3/0
 end
@@ -177,6 +173,23 @@ def do_cmd(cmd, event, args)
     end
 end
 
+def do_subcmd(cmd, subcmd, event, args)
+    begin
+        a = @subcmds[cmd.to_sym][subcmd.to_sym]
+        if !a
+            return event.respond 'Um, that\'s not a subcommand.'
+        end
+        a.call(event, args)
+    rescue => a
+        event.channel.send_embed("") do |embed|
+            embed.title = "An error occurred."
+            embed.description = "In essence, Ry is bad. Just... go ahead and tell him or something."
+            embed.colour = 0xFF0000
+            embed.add_field(name: "Error info", value: "```\n#{a}```")
+        end
+    end
+end
+
 def check_prefix(content, prefixes)
     prefixes.each { |prefix|
         m = content.match(/^#{Regexp.escape(prefix)}\s*(\S*)\s*(.*)/m)
@@ -208,6 +221,11 @@ bot.message do |event|
     if cmd
         do_cmd cmd, event, args
     end
+end
+
+bot.ready do
+    puts 'bot ready'
+    bot.game = "rb!help / rb!invoke list | rubyboat v#{version}"
 end
 
 ## end hecking command framework ##
