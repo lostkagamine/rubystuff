@@ -1,4 +1,4 @@
-# rubyboat comand handler v0.01
+# rubyboat comand handler v -insert version number from config.yml here-
 # (c) ry00001 2017
 
 # <ryware>
@@ -18,7 +18,6 @@ puts "Bot invite link: #{bot.invite_url}"
 
 @prefix = ['rb!', 'r!', 'hey ruboat, can you do ', 'pls ']
 @suffix = [', do it', ' pls']
-@regex = [/$ do it/] # experimental(tm) regex(tm) feature(tm)
 
 @cmds = {}
 @descs = {}
@@ -36,13 +35,36 @@ def add_subcmd(cmd, sname, &block)
     @subcmds[cmd][sname] = block
 end
 
+def do_help_sub(cmd, event)
+    if !cmd
+        event.respond 'Oops, that\'s not even meant to happen. Please tell Ry about this.'
+        return
+    end
+    event.channel.send_embed("") do |embed|
+        begin
+            embed.color = 0x00FF00
+            embed.title = "Command info for #{cmd}"
+            embed.add_field(name: 'Description', value: @descs[cmd])
+            if @subcmds[cmd]
+                a = @subcmds[cmd].keys().join(', ')
+                embed.add_field(name: 'Subcommands', value: "```\n#{a}```")
+            end
+        rescue => a
+            embed.color = 0xFF0000
+            embed.title = 'Oops.'
+            embed.description = 'Whoops! This isn\'t meant to happen! Ever! Please do Ry a favour and tell him.'
+            embed.add_field(name: 'Error details', value: "```\n#{a}```")
+        end
+    end
+end
+
 
 
 add_cmd(:hi, "Hello.") do |e, args|
     e.respond "hi"
 end
 
-add_cmd(:eval, 'Please don\'t try to use this.') do |e, args|
+add_cmd(:eval, 'Please don\'t try to use this. Seriously, don\'t.') do |e, args|
     next unless e.author.id == owner
     begin
         o = eval args.join(' ')
@@ -80,19 +102,23 @@ add_cmd(:exit, 'Nooooo!') do |e, args|
 end
 
 add_cmd(:help, '...') do |e, args|
-    lul = @cmds.keys
-    mmLol = @descs.values
-    e.channel.send_embed("") do |embed|
-        embed.colour = 0x00FF00
-        embed.title = "RubyBoat Commands"
-        lul.each_with_index do |key, ind|
-            if @subcmds[key.to_sym] # check if it has any subcommands. if it does, doc them.
-                scmds = "\n\n**Available subcommands:**\n`#{@subcmds[key.to_sym].keys.join(', ')}`"
-                embed.add_field(name: key, value: mmLol[ind] + scmds, inline: true)
-            else
-                embed.add_field(name: key, value: mmLol[ind], inline: true)
+    if !args[0]
+        lul = @cmds.keys
+        mmLol = @descs.values
+        e.channel.send_embed("") do |embed|
+            embed.colour = 0x00FF00
+            embed.title = "RubyBoat Commands"
+            lul.each_with_index do |key, ind|
+                if @subcmds[key.to_sym] # check if it has any subcommands. if it does, doc them.
+                    scmds = "\n\n**Available subcommands:**\n`#{@subcmds[key.to_sym].keys.join(', ')}`"
+                    embed.add_field(name: key, value: mmLol[ind] + scmds, inline: false)
+                else
+                    embed.add_field(name: key, value: mmLol[ind], inline: false)
+                end
             end
         end
+    else
+        do_help_sub(args[0], e)
     end
 end
 
