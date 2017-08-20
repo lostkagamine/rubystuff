@@ -85,10 +85,14 @@ add_cmd(:help, '...') do |e, args|
     e.channel.send_embed("") do |embed|
         embed.colour = 0x00FF00
         embed.title = "RubyBoat Commands"
-        lul.each_with_index do |key, index|
-            lul[index] = "**#{key}** - #{mmLol[index]}"
+        lul.each_with_index do |key, ind|
+            if @subcmds[key.to_sym] # check if it has any subcommands. if it does, doc them.
+                scmds = @subcmds[key.to_sym].keys.join(', ')
+                embed.add_field(name: key, value: mmLol[ind] + "\n\n**Available subcommands:**\n`#{scmds}`")
+            else
+                embed.add_field(name: key, value: mmLol[ind])
+            end
         end
-        embed.description = lul.join("\n")
     end
 end
 
@@ -177,7 +181,7 @@ def do_subcmd(cmd, subcmd, event, args)
     begin
         a = @subcmds[cmd.to_sym][subcmd.to_sym]
         if !a
-            return event.respond 'Um, that\'s not a subcommand.'
+            return event.respond "Um, that\'s not a subcommand. Available subcommands are `#{@subcmds[cmd.to_sym].keys.join(', ')}`."
         end
         a.call(event, args)
     rescue => a
