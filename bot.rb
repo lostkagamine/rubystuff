@@ -87,10 +87,10 @@ add_cmd(:help, '...') do |e, args|
         embed.title = "RubyBoat Commands"
         lul.each_with_index do |key, ind|
             if @subcmds[key.to_sym] # check if it has any subcommands. if it does, doc them.
-                scmds = @subcmds[key.to_sym].keys.join(', ')
-                embed.add_field(name: key, value: mmLol[ind] + "\n\n**Available subcommands:**\n`#{scmds}`")
+                scmds = "\n\n**Available subcommands:**\n`#{@subcmds[key.to_sym].keys.join(', ')}`"
+                embed.add_field(name: key, value: mmLol[ind] + scmds, inline: true)
             else
-                embed.add_field(name: key, value: mmLol[ind])
+                embed.add_field(name: key, value: mmLol[ind], inline: true)
             end
         end
     end
