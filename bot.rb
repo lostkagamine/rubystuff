@@ -36,16 +36,13 @@ def add_subcmd(cmd, sname, &block)
 end
 
 def do_help_sub(cmd, event)
-    if !cmd
-        event.respond 'Oops, that\'s not even meant to happen. Please tell Ry about this.'
-        return
-    end
-    event.channel.send_embed do |embed|
+    cmd = cmd.to_sym
+    event.channel.send_embed("") do |embed|
         begin
             embed.color = 0x00FF00
             embed.title = "Command info for #{cmd}"
             embed.add_field(name: 'Description', value: @descs[cmd])
-            return unless @subcmds[cmd]
+            next unless @subcmds[cmd]
             a = @subcmds[cmd].keys().join(', ')
             embed.add_field(name: 'Subcommands', value: "```\n#{a}```")
         rescue => a
@@ -104,7 +101,7 @@ add_cmd(:help, '...') do |e, args|
     if !args[0]
         lul = @cmds.keys
         mmLol = @descs.values
-        e.channel.send_embed do |embed|
+        e.channel.send_embed("") do |embed|
             embed.colour = 0x00FF00
             embed.title = "RubyBoat Commands"
             lul.each_with_index do |key, ind|
@@ -115,6 +112,7 @@ add_cmd(:help, '...') do |e, args|
                     embed.add_field(name: key, value: mmLol[ind], inline: false)
                 end
             end
+            embed.footer = Discordrb::Webhooks::EmbedFooter.new(text: 'Do \'help <command>\' for not-that-much-more info.')
         end
     else
         do_help_sub(args[0], e)
@@ -193,7 +191,7 @@ def do_cmd(cmd, event, args)
         return unless a
         a.call(event, args)
     rescue => a
-        event.channel.send_embed do |embed|
+        event.channel.send_embed("") do |embed|
             embed.title = "An error occurred."
             embed.description = "In essence, Ry is bad. Just... go ahead and tell him or something."
             embed.colour = 0xFF0000
@@ -210,7 +208,7 @@ def do_subcmd(cmd, subcmd, event, args)
         end
         a.call(event, args)
     rescue => a
-        event.channel.send_embed do |embed|
+        event.channel.send_embed("") do |embed|
             embed.title = "An error occurred."
             embed.description = "In essence, Ry is bad. Just... go ahead and tell him or something."
             embed.colour = 0xFF0000
