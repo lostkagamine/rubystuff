@@ -4,8 +4,9 @@
 # <ryware>
 
 require 'discordrb'
+require 'yaml'
 
-config = YAML.load 'config.yml' # ok]
+config = YAML.load_file 'config.yml' # ok]
 tk = config['login']['token']
 id = config['login']['id']
 owner = config['settings']['owner']
