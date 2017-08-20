@@ -158,7 +158,7 @@ end
 
 add_cmd(:base64, 'Do stuff with Base64!') do |e, args|
     if args[0] != nil
-        do_subcmd(:invoke, args[0].to_sym, e, args)
+        do_subcmd(:base64, args[0].to_sym, e, args)
     end
 end
 
