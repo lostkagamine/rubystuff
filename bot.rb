@@ -5,6 +5,7 @@
 
 require 'discordrb'
 require 'yaml'
+require 'base64'
 
 config = YAML.load_file 'config.yml' # ok]
 tk = config['login']['token']
@@ -153,6 +154,24 @@ add_subcmd(:invoke, :add_suffix) do |e, args|
     else
         e.respond 'Um, nope. I\'m afraid I can\'t let you do that. This suffix is already present.'
     end
+end
+
+add_cmd(:base64, 'Do stuff with Base64!') do |e, args|
+    if args[0] != nil
+        do_subcmd(:invoke, args[0].to_sym, e, args)
+    end
+end
+
+add_subcmd(:base64, :encode) do |e, args|
+    text = args.join(' ')
+    b64 = Base64.encode64(text).chomp
+    e.respond "**Base64 Encode**\n\nYour encoded text is `#{b64}`"
+end
+
+add_subcmd(:base64, :decode) do |e, args|
+    text = args.join(' ')
+    b64 = Base64.decode64(text).chomp
+    e.respond "**Base64 Encode**\n\nYour encoded text is `#{b64}`"
 end
 
 add_cmd(:error, 'ok') do |e, args|
