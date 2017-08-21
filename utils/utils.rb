@@ -1,14 +1,14 @@
 require 'discordrb'
 
 class Utils
-  class CommandArgError < StandardError; end
+  class UserError < StandardError; end
 end
 
 module UtilMethods
   def self.do_error_embed(heck, event)
-    if heck.is_a? Utils::CommandArgError
+    if heck.is_a? Utils::UserError
         event.channel.send_embed('') do |embed|
-            embed.title = 'Incorrect command arguments.'
+            embed.title = 'User error.'
             embed.description = 'This is *your* fault. Don\'t report this as a bug.'
             embed.colour = 0xFF0000
             embed.add_field(name: 'What you did wrong (aka Error Info)', value: "```\n#{heck}```")

@@ -136,11 +136,11 @@ end
 
 bot.add_subcmd(:mod, :kick) do |e, args|
     heck = bot.parse_mention(args[1])
-    if !heck.is_a? Discordrb::User
-        raise Utils::CommandArgError, 'Mention a valid member.'
-    end
+    raise Utils::UserError, 'Mention a valid member.' unless heck.is_a? Discordrb::User
+    raise Utils::UserError, 'Insufficient permissions. You need "Kick Members".' unless e.author.permission? :kick_members
     user = heck.on(e.server)
-    user.kick
+    e.server.kick user
+    e.respond ':ok_hand:'
 end
 
 bot.add_cmd(:argtest, 'aaaaaaaa') do |e, args|
@@ -148,7 +148,7 @@ bot.add_cmd(:argtest, 'aaaaaaaa') do |e, args|
 end
 
 bot.add_cmd(:heck, 'aaaAAaaAaAaa') do |e, args|
-    raise Utils::CommandArgError, 'heck you'
+    raise Utils::UserError, 'heck you'
 end
 
 bot.add_subcmd(:invoke, :list) do |e, args|
