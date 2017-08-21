@@ -6,6 +6,7 @@
 require 'discordrb'
 require 'yaml'
 require 'base64'
+require './utils/utils.rb'
 
 config = YAML.load_file 'config.yml' # ok]
 tk = config['login']['token']
@@ -37,6 +38,13 @@ class Bot < Discordrb::Bot
             a = @cmds[cmd.to_sym]
             return unless a
             a.call(event, args)
+        rescue Utils::CommandArgError => err
+            event.channel.send_embed('') do |embed|
+                embed.title = 'Incorrect command arguments.'
+                embed.description = 'This is *your* fault. Don\'t report this as a bug.'
+                embed.colour = 0xFF0000
+                embed.add_field(name: 'What you did wrong (aka Error Info)', value: "```\n#{err}```")
+            end
         rescue => a
             event.channel.send_embed("") do |embed|
                 embed.title = "An error occurred."
@@ -135,6 +143,30 @@ bot.add_cmd(:invoke, 'Manage Ruboat\'s invokers.') do |e, args|
     if args[0] != nil
         bot.do_subcmd(:invoke, args[0].to_sym, e, args)
     end
+end
+
+bot.add_cmd(:mod, 'Do moderative actions with Ruboat!') do |e, args|
+    if args[0] != nil
+        bot.do_subcmd(:mod, args[0].to_sym, e, args)
+    end
+end
+
+bot.add_subcmd(:mod, :kick) do |e, args|
+    heck = bot.parse_mention(args[1])
+    if !heck.is_a? Discordrb::User
+        raise Utils::CommandArgError, 'Mention a valid member.
+        '
+    end
+    user = heck.on(e.server)
+    user.kick
+end
+
+bot.add_cmd(:argtest, 'aaaaaaaa') do |e, args|
+    p args
+end
+
+bot.add_cmd(:heck, 'aaaAAaaAaAaa') do |e, args|
+    raise Utils::CommandArgError, 'heck you'
 end
 
 bot.add_subcmd(:invoke, :list) do |e, args|
