@@ -49,7 +49,7 @@ class Bot < Discordrb::Bot
             if !a
                 return event.respond "Um, that\'s not a subcommand. Available subcommands are `#{@subcmds[cmd.to_sym].keys.join(', ')}`."
             end
-            a.call(event, args)
+            a.call event, args.drop(1)
         rescue => a
             UtilMethods.do_error_embed(a, event)
         end
@@ -135,7 +135,7 @@ bot.add_cmd(:mod, 'Do moderative actions with Ruboat!') do |e, args|
 end
 
 bot.add_subcmd(:mod, :kick) do |e, args|
-    heck = bot.parse_mention(args[1])
+    heck = bot.parse_mention(args[0])
     raise Utils::UserError, 'Mention a valid member.' unless heck.is_a? Discordrb::User
     raise Utils::UserError, 'Insufficient permissions. You need "Kick Members".' unless e.author.permission? :kick_members
     user = heck.on(e.server)
@@ -144,7 +144,7 @@ bot.add_subcmd(:mod, :kick) do |e, args|
 end
 
 bot.add_subcmd(:mod, :ban) do |e, args|
-    heck = bot.parse_mention(args[1])
+    heck = bot.parse_mention(args[0])
     raise Utils::UserError, 'Mention a valid member.' unless heck.is_a? Discordrb::User
     raise Utils::UserError, 'Insufficient permissions. You need "Ban Members".' unless e.author.permission? :ban_members
     user = heck.on(e.server)
@@ -155,7 +155,7 @@ end
 bot.add_subcmd(:mod, :unban) do |e, args|
     raise Utils::UserError, 'Insufficient permissions. You need "Ban Members".' unless e.author.permission? :ban_members
     e.server.bans.each do |banne|
-        if banne.username == args[1, args.length].join(' ')
+        if banne.username == args.join(' ')
             e.server.unban banne
             e.respond ':ok_hand:'
         end
@@ -175,8 +175,7 @@ bot.add_subcmd(:invoke, :list) do |e, args|
 end
 
 bot.add_subcmd(:invoke, :prefix) do |e, args|
-    prefix = args[1, args.length]
-    prefix = prefix.join ' '
+    prefix = args.join ' '
     prefix = prefix.tr '"', ''
     prefix = prefix.tr "'", ''
     if !@prefix.include? prefix
@@ -189,9 +188,8 @@ bot.add_subcmd(:invoke, :prefix) do |e, args|
 end
 
 bot.add_subcmd(:invoke, :suffix) do |e, args|
-    suffix = args[1, args.length]
     suffix = suffix.join ' '
-    suffix = suffix.tr '"', ''
+    suffix = args.tr '"', ''
     suffix = suffix.tr "'", ''
     if !@suffix.include? suffix
         @suffix << suffix
