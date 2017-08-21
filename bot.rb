@@ -6,7 +6,7 @@
 require 'discordrb'
 require 'yaml'
 require 'base64'
-require './utils/utils.rb'
+require_relative 'utils/utils'
 
 config = YAML.load_file 'config.yml' # ok]
 tk = config['login']['token']
@@ -38,20 +38,8 @@ class Bot < Discordrb::Bot
             a = @cmds[cmd.to_sym]
             return unless a
             a.call(event, args)
-        rescue Utils::CommandArgError => err
-            event.channel.send_embed('') do |embed|
-                embed.title = 'Incorrect command arguments.'
-                embed.description = 'This is *your* fault. Don\'t report this as a bug.'
-                embed.colour = 0xFF0000
-                embed.add_field(name: 'What you did wrong (aka Error Info)', value: "```\n#{err}```")
-            end
         rescue => a
-            event.channel.send_embed("") do |embed|
-                embed.title = "An error occurred."
-                embed.description = "In essence, Ry is bad. Just... go ahead and tell him or something."
-                embed.colour = 0xFF0000
-                embed.add_field(name: "Error info", value: "```\n#{a}```")
-            end
+            UtilMethods.do_error_embed(a, event)
         end
     end
 
@@ -63,12 +51,7 @@ class Bot < Discordrb::Bot
             end
             a.call(event, args)
         rescue => a
-            event.channel.send_embed("") do |embed|
-                embed.title = "An error occurred."
-                embed.description = "In essence, Ry is bad. Just... go ahead and tell him or something."
-                embed.colour = 0xFF0000
-                embed.add_field(name: "Error info", value: "```\n#{a}```")
-            end
+            UtilMethods.do_error_embed(a, event)
         end
     end
 end
