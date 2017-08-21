@@ -134,29 +134,31 @@ add_subcmd(:invoke, :list) do |e, args|
     e.respond "**RubyBoat Invokers**\n\n```\nPrefixes: #{@prefix.join(' | ')}\nSuffixes: #{@suffix.join(' | ')}```"
 end
 
-add_subcmd(:invoke, :add_prefix) do |e, args|
+add_subcmd(:invoke, :prefix) do |e, args|
     prefix = args[1, args.length]
     prefix = prefix.join ' '
     prefix = prefix.tr '"', ''
     prefix = prefix.tr "'", ''
     if !@prefix.include? prefix
         @prefix << prefix
-        e.respond ':ok_hand:'
+        e.respond 'Added :ok_hand:'
     else
-        e.respond 'Um, nope. No duplicates allowed.'
+        @prefix.delete prefix
+        e.respond 'Removed :ok_hand:'
     end
 end
 
-add_subcmd(:invoke, :add_suffix) do |e, args|
+add_subcmd(:invoke, :suffix) do |e, args|
     suffix = args[1, args.length]
     suffix = suffix.join ' '
     suffix = suffix.tr '"', ''
     suffix = suffix.tr "'", ''
     if !@suffix.include? suffix
         @suffix << suffix
-        e.respond ':ok_hand:'
+        e.respond 'Added :ok_hand:'
     else
-        e.respond 'Um, nope. I\'m afraid I can\'t let you do that. This suffix is already present.'
+        @suffix.delete suffix
+        e.respond 'Removed :ok_hand:'
     end
 end
 
