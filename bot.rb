@@ -143,6 +143,25 @@ bot.add_subcmd(:mod, :kick) do |e, args|
     e.respond ':ok_hand:'
 end
 
+bot.add_subcmd(:mod, :ban) do |e, args|
+    heck = bot.parse_mention(args[1])
+    raise Utils::UserError, 'Mention a valid member.' unless heck.is_a? Discordrb::User
+    raise Utils::UserError, 'Insufficient permissions. You need "Ban Members".' unless e.author.permission? :ban_members
+    user = heck.on(e.server)
+    e.server.ban user
+    e.respond ':ok_hand:'
+end
+
+bot.add_subcmd(:mod, :unban) do |e, args|
+    raise Utils::UserError, 'Insufficient permissions. You need "Ban Members".' unless e.author.permission? :ban_members
+    e.server.bans.each do |banne|
+        if banne.username == args[1, args.length].join(' ')
+            e.server.unban banne
+            e.respond ':ok_hand:'
+        end
+    end
+end
+
 bot.add_cmd(:argtest, 'aaaaaaaa') do |e, args|
     p args
 end
