@@ -38,6 +38,10 @@ end
 
 def do_help_sub(cmd, event)
     cmd = cmd.to_sym
+    if !@cmds[cmd] || !@descs[cmd]
+        event.respond 'Not a command, sorry. Do \'help\' to view them.'
+        return
+    end
     event.channel.send_embed("") do |embed|
         begin
             embed.color = 0x00FF00
@@ -158,20 +162,20 @@ end
 
 add_cmd(:base64, 'Do stuff with Base64!') do |e, args|
     if args[0] != nil
-        do_subcmd(:invoke, args[0].to_sym, e, args)
+        do_subcmd(:base64, args[0].to_sym, e, args)
     end
 end
 
 add_subcmd(:base64, :encode) do |e, args|
-    text = args.join(' ')
+    text = args[1, args.length].join(' ')
     b64 = Base64.encode64(text).chomp
     e.respond "**Base64 Encode**\n\nYour encoded text is `#{b64}`"
 end
 
 add_subcmd(:base64, :decode) do |e, args|
-    text = args.join(' ')
+    text = args[1, args.length].join(' ')
     b64 = Base64.decode64(text).chomp
-    e.respond "**Base64 Encode**\n\nYour encoded text is `#{b64}`"
+    e.respond "**Base64 Decode**\n\nYour decoded text is `#{b64}`"
 end
 
 add_cmd(:error, 'ok') do |e, args|
