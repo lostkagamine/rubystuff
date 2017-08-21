@@ -154,8 +154,7 @@ end
 bot.add_subcmd(:mod, :kick) do |e, args|
     heck = bot.parse_mention(args[1])
     if !heck.is_a? Discordrb::User
-        raise Utils::CommandArgError, 'Mention a valid member.
-        '
+        raise Utils::CommandArgError, 'Mention a valid member.'
     end
     user = heck.on(e.server)
     user.kick
