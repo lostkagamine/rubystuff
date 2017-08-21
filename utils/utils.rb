@@ -5,20 +5,20 @@ class Utils
 end
 
 module UtilMethods
-  def do_error_embed(heck, event)
-    if heck.is_a? self.CommandArgError
+  def self.do_error_embed(heck, event)
+    if heck.is_a? Utils::CommandArgError
         event.channel.send_embed('') do |embed|
             embed.title = 'Incorrect command arguments.'
             embed.description = 'This is *your* fault. Don\'t report this as a bug.'
             embed.colour = 0xFF0000
-            embed.add_field(name: 'What you did wrong (aka Error Info)', value: "```\n#{err}```")
+            embed.add_field(name: 'What you did wrong (aka Error Info)', value: "```\n#{heck}```")
         end
       else
         event.channel.send_embed("") do |embed|
             embed.title = "An error occurred."
             embed.description = "In essence, Ry is bad. Just... go ahead and tell him or something."
             embed.colour = 0xFF0000
-            embed.add_field(name: "Error info", value: "```\n#{a}```")
+            embed.add_field(name: "Error info", value: "```\n#{heck}```")
         end
       end
   end
