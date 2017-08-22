@@ -188,8 +188,8 @@ bot.add_subcmd(:invoke, :prefix) do |e, args|
 end
 
 bot.add_subcmd(:invoke, :suffix) do |e, args|
-    suffix = suffix.join ' '
-    suffix = args.tr '"', ''
+    suffix = args.join ' '
+    suffix = suffix.tr '"', ''
     suffix = suffix.tr "'", ''
     if !@suffix.include? suffix
         @suffix << suffix
