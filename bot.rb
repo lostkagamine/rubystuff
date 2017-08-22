@@ -20,6 +20,15 @@ class Bot < Discordrb::Bot
         @cmds = {}
         @descs = {}
         @subcmds = {}
+        Dir.glob 'plugins/*.rb' do |plugin|
+            existing = ObjectSpace.each_object(Module).to_a
+            puts "Initializing plugin #{plugin}"
+            require "./#{plugin}"
+            newmod = ObjectSpace.each_object(Module).to_a - existing
+            newmod.each do |mod|
+                mod.setup self
+            end
+        end
     end
 
     def add_cmd(name, desc, &block)
